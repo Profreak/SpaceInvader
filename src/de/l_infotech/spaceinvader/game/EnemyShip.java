@@ -4,10 +4,16 @@ public class EnemyShip implements SpaceObject {
 	
 	// Annahme links oben ist 0/0
 	private Box box;
-	private int[][] grafik;
-	private int[][] destroyGrafik;
+	private byte[][] grafik;
+	private byte[][] destroyGrafik;
 	private boolean alive;
+	private byte a = SpaceEngine.SHINE;
 	
+	private byte[][] size3 = new byte[][]{
+			{a,0,a},
+			{a,a,a},
+			{a,0,a}};
+		
 	/**
 	 * creates a new Space Ship
 	 * 
@@ -17,9 +23,12 @@ public class EnemyShip implements SpaceObject {
 	 * @param height of the Space Ship
 	 */
 	public EnemyShip(int x, int y,int width, int height) {
-		box = new Box(x, x + width, y, y - height);
-		grafik = new int[width][height];
-		destroyGrafik = new int[width][height];
+		box = new Box(x, x + width -1, y, y + height -1);
+		grafik = new byte[width][height];
+		destroyGrafik = new byte[width][height];
+		
+		grafik = size3;
+		destroyGrafik = size3;
 	}
 	
 	/**
@@ -43,7 +52,7 @@ public class EnemyShip implements SpaceObject {
 	}
 
 	@Override
-	public int[][] getGrafik() {
+	public byte[][] getGrafik() {
 		if(!alive){
 			return destroyGrafik;
 		}

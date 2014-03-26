@@ -5,9 +5,15 @@ public class PlayerShip implements SpaceObject {
 	// Annahme links oben ist 0/0
 	private Box box;
 	private int lives;
-	private int[][] grafik;
-	private int[][] destroyGrafik;
+	private byte[][] grafik;
+	private byte[][] destroyGrafik;
 	private boolean alive;
+	private byte a = SpaceEngine.SHINE;
+	
+	private byte[][] size3 = new byte[][]{
+		{0,a,0},
+		{0,a,0},
+		{a,0,a}};
 	
 	/**
 	 * creates a new Space Ship
@@ -19,9 +25,11 @@ public class PlayerShip implements SpaceObject {
 	 * @param lives of the ship
 	 */
 	public PlayerShip(int x, int y,int width, int height, int lives) {
-		box = new Box(x, x + width, y, y - height);
-		grafik = new int[width][height];
-		destroyGrafik = new int[width][height];
+		box = new Box(x, x + width -1, y, y + height -1);
+		grafik = new byte[width][height];
+		destroyGrafik = new byte[width][height];
+		grafik = size3;
+		destroyGrafik = size3;
 	}
 	
 	/**
@@ -55,7 +63,7 @@ public class PlayerShip implements SpaceObject {
 	}
 
 	@Override
-	public int[][] getGrafik() {
+	public byte[][] getGrafik() {
 		if(!alive){
 			return destroyGrafik;
 		}

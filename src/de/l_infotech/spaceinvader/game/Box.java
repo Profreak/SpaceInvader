@@ -1,5 +1,7 @@
 package de.l_infotech.spaceinvader.game;
 
+import android.util.Log;
+
 /**
  * a Coordinate Box 
  * 
@@ -8,6 +10,7 @@ package de.l_infotech.spaceinvader.game;
  */
 public class Box {
 
+	public static final String TAG = Box.class.getSimpleName();
 	public int x0;
 	public int x1;
 	public int y0;
@@ -22,6 +25,7 @@ public class Box {
 	 * @param y1 bottom y coordinates
 	 */
 	public Box(int x0, int x1, int y0, int y1) {
+		Log.d(TAG, "x0: " + x0 + " y0: " + y0 + " x1: " +  x1  + " y1: " + y1 );
 		this.x0 = x0;
 		this.x1 = x1;
 		this.y0 = y0;
@@ -50,10 +54,15 @@ public class Box {
 	 * @param x x Coordinate
 	 * @param y y Coordinate
 	 */
-	public void move(int x, int y){
-		x0 += x;
-		x1 += x;
-		y0 += y;
-		y1 += y;
+	public boolean move(int x, int y){
+		if((x0+x) >= 0 && (y0+y) >= 0 && (x1+x) < SpaceEngine.MAX_RESOLUTION && (y1+y) < SpaceEngine.MAX_RESOLUTION){
+			Log.d(TAG, "move x: " + x + " y: " + y);
+			x0 += x;
+			x1 += x;
+			y0 += y;
+			y1 += y;
+			return true;
+		}
+		return false;
 	}
 }

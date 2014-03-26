@@ -8,5 +8,5 @@ public interface SpaceObject {
 	
 	public boolean isAlive();
 	
-	public int[][] getGrafik();
+	public byte[][] getGrafik();
 }

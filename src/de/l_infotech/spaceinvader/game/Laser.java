@@ -10,7 +10,13 @@ public class Laser implements SpaceObject {
 	// Annahme links oben ist 0/0
 	private Box box;
 	private boolean alive;
-	int[][] grafik;
+	byte[][] grafik;
+	
+	private byte a = SpaceEngine.SHINE;
+	
+	private byte[][] size2 = new byte[][]{
+			{a},
+			{a}};
 	
 	/**
 	 * creates a new Space Ship
@@ -20,9 +26,11 @@ public class Laser implements SpaceObject {
 	 * @param t thickness of the Space Ship
 	 */
 	public Laser(int x, int y, int t) {
-		box = new Box(x, x  + t, y, y + 3*t);
+		box = new Box(x, x  + t, y, y + 2*t);
 		alive = true;
-		grafik = new int[x+t][y+3*t];
+		grafik = new byte[2][1]; // grafik hack
+		
+		grafik = size2;
 	}
 	
 	/**
@@ -45,7 +53,7 @@ public class Laser implements SpaceObject {
 	}
 
 	@Override
-	public int[][] getGrafik() {
+	public byte[][] getGrafik() {
 		return grafik;
 	}
 

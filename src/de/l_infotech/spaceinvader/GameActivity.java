@@ -3,7 +3,10 @@ package de.l_infotech.spaceinvader;
 import de.l_infotech.spaceinvader.bluetooth.BluetoothConnector;
 import de.l_infotech.spaceinvader.game.SpaceEngine;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.widget.Toast;
@@ -44,6 +47,12 @@ public class GameActivity extends Activity{
 		}
 		
 		game = new SpaceEngine(connection);
+		
+		SensorManager sm = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+		Sensor s = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		sm.registerListener(game, s, SensorManager.SENSOR_DELAY_GAME);
+		this.findViewById(R.id.fireButton).setOnTouchListener(game);
+		
 		game.start();
 	}
 

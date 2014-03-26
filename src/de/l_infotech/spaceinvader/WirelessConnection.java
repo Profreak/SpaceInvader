@@ -11,4 +11,6 @@ public interface WirelessConnection {
 	public boolean startAdapter(Activity activity);
 	
 	public boolean connect(String address);
+
+	public void send(byte[] matrixInMessage);
 }
