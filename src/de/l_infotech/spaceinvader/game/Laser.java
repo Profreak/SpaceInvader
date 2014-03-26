@@ -61,4 +61,9 @@ public class Laser implements SpaceObject {
 	public boolean isAlive() {
 		return alive;
 	}
+
+	@Override
+	public byte[][] getDestroyGrafik() {
+		return grafik;
+	}
 }

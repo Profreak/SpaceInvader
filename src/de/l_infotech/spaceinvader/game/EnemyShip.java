@@ -13,6 +13,11 @@ public class EnemyShip implements SpaceObject {
 			{a,0,a},
 			{a,a,a},
 			{a,0,a}};
+
+	private byte[][] size3_d = new byte[][]{
+			{a,0,a},
+			{0,a,0},
+			{a,0,a}};
 		
 	/**
 	 * creates a new Space Ship
@@ -26,9 +31,10 @@ public class EnemyShip implements SpaceObject {
 		box = new Box(x, x + width -1, y, y + height -1);
 		grafik = new byte[width][height];
 		destroyGrafik = new byte[width][height];
+		alive = true;
 		
 		grafik = size3;
-		destroyGrafik = size3;
+		destroyGrafik = size3_d;
 	}
 	
 	/**
@@ -36,6 +42,7 @@ public class EnemyShip implements SpaceObject {
 	 * 
 	 * @return Coordinates as int[] x than y
 	 */
+	@Override
 	public Box getCoordinates() {
 		return box;
 	}
@@ -62,6 +69,11 @@ public class EnemyShip implements SpaceObject {
 	@Override
 	public boolean isAlive() {
 		return alive;
+	}
+
+	@Override
+	public byte[][] getDestroyGrafik() {
+		return destroyGrafik;
 	}
 	
 }

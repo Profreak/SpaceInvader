@@ -39,9 +39,18 @@ public class Box {
 	 * @param y y Coordinates
 	 * @return true if hit 
 	 */
+	
+	// x0: 1 - x1: 3
+	// y0: 0 - y1: 2
+	//	x: 2 -  y: 1
+	//
+	//
 	public boolean isHit(int x, int y){
-		if(x0 < x && x < x1) {
-			if(y0 < x && x < y1) {
+		if(x0 <= x && x <= x1) {
+			if(y0 <= x && x <= y1) {
+				Log.d("HIT", "HIT at x: "+ x + " y: " + y);
+				Log.d("HIT", "HIT at x: "+ x0 + " y: " + x1);
+				Log.d("HIT", "HIT at x: "+ y0 + " y: " + y1);
 				return true;
 			}
 		}

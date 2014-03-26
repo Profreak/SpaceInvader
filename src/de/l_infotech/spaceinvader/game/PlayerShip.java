@@ -74,4 +74,10 @@ public class PlayerShip implements SpaceObject {
 	public boolean isAlive() {
 		return alive;
 	}
+
+	@Override
+	public byte[][] getDestroyGrafik() {
+		// TODO Auto-generated method stub
+		return destroyGrafik;
+	}
 }

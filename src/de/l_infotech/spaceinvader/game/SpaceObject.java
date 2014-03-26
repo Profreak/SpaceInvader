@@ -9,4 +9,6 @@ public interface SpaceObject {
 	public boolean isAlive();
 	
 	public byte[][] getGrafik();
+
+	byte[][] getDestroyGrafik();
 }

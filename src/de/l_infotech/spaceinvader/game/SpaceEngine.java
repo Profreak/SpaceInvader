@@ -2,7 +2,10 @@ package de.l_infotech.spaceinvader.game;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -12,7 +15,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-
 import de.l_infotech.spaceinvader.WirelessConnection;
 
 /**
@@ -32,14 +34,16 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	// TeCo Rasperry Pi Bluetooth MAC
 	// private static String address = "5C:F3:70:02:D7:C7";
 
-	public static final int START_PLAYER_X = 21;
+	public static final int START_PLAYER_X = 20;
 	public static final int START_PLAYER_Y = 6;
 	public static final int START_PLAYER_LIVES = 1;
 
+	private static final int ENEMY_SPEED = 500;
+
 	public static final int SHIP_WIDTH = 3;
 	public static final int SHIP_HEIGHT = 3;
-	
-	public static final int LASER_SPEED = 200;
+
+	public static final int LASER_SPEED = 100;
 	public static final int LASER_THICKNESS = 1;
 
 	public static final byte SHINE = (byte) 255;
@@ -49,10 +53,12 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	public static final int SENSITIVITY = 100;
 
 	public static final int MAX_RESOLUTION = 24;
+	public static final int BOTTOM_BORDER = 10;
 
 	private PlayerShip player;
-	private LinkedList<EnemyShip> enemys;
-	private LinkedList<Laser> lasers;
+	private List<EnemyShip> enemys;
+	private List<Laser> lasers;
+	// private List<SpaceObject> hitables;
 
 	private int score;
 
@@ -81,17 +87,54 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		player = new PlayerShip(START_PLAYER_X, START_PLAYER_Y, SHIP_WIDTH,
 				SHIP_HEIGHT, START_PLAYER_LIVES);
-
+		// hitables = new LinkedList<SpaceObject>();
 		enemys = new LinkedList<EnemyShip>();
-		enemys.add(new EnemyShip(0, 0, 0, 0));
-		enemys.add(new EnemyShip(0, 0, 0, 0));
-		enemys.add(new EnemyShip(0, 0, 0, 0));
-		enemys.add(new EnemyShip(0, 0, 0, 0));
-		enemys.add(new EnemyShip(0, 0, 0, 0));
+		/*
+		 * // Enemy Hack first 6 enemys.add(new EnemyShip(1, 0, SHIP_WIDTH,
+		 * SHIP_HEIGHT)); enemys.add(new EnemyShip(1, 4, SHIP_WIDTH,
+		 * SHIP_HEIGHT)); enemys.add(new EnemyShip(1, 8, SHIP_WIDTH,
+		 * SHIP_HEIGHT));
+		 * 
+		 * enemys.add(new EnemyShip(1, 12, SHIP_WIDTH, SHIP_HEIGHT));
+		 * enemys.add(new EnemyShip(1, 16, SHIP_WIDTH, SHIP_HEIGHT)); //
+		 * enemys.add(new EnemyShip(1, 20, SHIP_WIDTH, SHIP_HEIGHT));
+		 * 
+		 * // next 6
+		 * 
+		 * enemys.add(new EnemyShip(6, 0, SHIP_WIDTH, SHIP_HEIGHT));
+		 * enemys.add(new EnemyShip(6, 4, SHIP_WIDTH, SHIP_HEIGHT));
+		 * enemys.add(new EnemyShip(6, 8, SHIP_WIDTH, SHIP_HEIGHT));
+		 * 
+		 * enemys.add(new EnemyShip(6, 12, SHIP_WIDTH, SHIP_HEIGHT));
+		 * enemys.add(new EnemyShip(6, 16, SHIP_WIDTH, SHIP_HEIGHT)); //
+		 * enemys.add(new EnemyShip(6, 20, SHIP_WIDTH, SHIP_HEIGHT));
+		 */
 
+		// initEnemy();
+		EnemyShip s = new EnemyShip(1, 0, SHIP_WIDTH, SHIP_HEIGHT);
+		EnemyShip s2 = new EnemyShip(1, 4, SHIP_WIDTH, SHIP_HEIGHT);
+
+		enemys.add(s);
+		// hitables.add(s);
+
+		enemys.add(s2);
+		// hitables.add(s2);
+
+		// hitables.add(player);
 		lasers = new LinkedList<Laser>();
 
 		connection.connect(address);
+
+	}
+
+	private void initEnemy() {
+		for (int x = 1; x < BOTTOM_BORDER; x = x + 5) {
+			for (int y = 0; y < MAX_RESOLUTION; y = y + 4) {
+				EnemyShip enemy = new EnemyShip(x, y, SHIP_WIDTH, SHIP_HEIGHT);
+				enemys.add(enemy);
+				// hitables.add(enemy);
+			}
+		}
 	}
 
 	public void insertGamefield(byte[][] grafik, int coor_x, int coor_y) {
@@ -136,6 +179,9 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	@Override
 	public void run() {
 
+		EnemyThread t = new EnemyThread();
+		// t.start();
+
 		while (true) {
 			field = new byte[MAX_RESOLUTION][MAX_RESOLUTION];
 
@@ -147,17 +193,39 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 			this.player.getCoordinates().move(0, move_y);
 
 			Log.d(TAG, "Lasers size: " + lasers.size());
-			
-			for(int z = 0; z < lasers.size(); z++){
+
+			// Display lasers
+
+			for (int z = 0; z < lasers.size(); z++) {
 				Laser value = lasers.get(z);
-				if(value.isAlive()){
-					insertGamefield(value.getGrafik(), value.getCoordinates().x0,
+				if (value.isAlive()) {
+					insertGamefield(value.getGrafik(),
+							value.getCoordinates().x0,
 							value.getCoordinates().y0);
 				} else {
 					lasers.remove(z);
 				}
 			}
+
+			// Display Enemys
+
+			synchronized (enemys) {
+				for (int z = 0; z < enemys.size(); z++) {
+					EnemyShip value = enemys.get(z);
+					if (value.isAlive()) {
+						insertGamefield(value.getGrafik(),
+								value.getCoordinates().x0,
+								value.getCoordinates().y0);
+					} else {
+						insertGamefield(value.getDestroyGrafik(),
+								value.getCoordinates().x0,
+								value.getCoordinates().y0);
+						enemys.remove(z);
+					}
+				}
+			}
 			
+			Log.d("Status", "Gegner Anzahl: " + enemys.size());
 			sendField(field);
 			try {
 				sleep(GAME_SPEED);
@@ -194,13 +262,13 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		}
 		return false;
 	}
-	
+
 	private boolean justShot = false;
 
 	private class DelayThread extends Thread {
 
 		private static final int SHOOT_DELAY = 4 * LASER_SPEED;
-		
+
 		@Override
 		public void run() {
 			try {
@@ -211,7 +279,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 			justShot = false;
 		}
 	}
-	
+
 	private class LaserThread extends Thread {
 
 		private int direction = 1;
@@ -228,13 +296,113 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 			Log.d(TAG_LASER, "Start Laser Thread");
 			while (laser.isAlive()) {
 
-				if(!laser.getCoordinates().move(direction, 0)){
+				if (!laser.getCoordinates().move(direction, 0)) {
 					laser.destroy();
+				} else {
+					synchronized (enemys) {
+						for (int x = 0; x < enemys.size(); x++) {
+							SpaceObject value = enemys.get(x);
+							if (value.getCoordinates().isHit(
+									laser.getCoordinates().x0,
+									laser.getCoordinates().y0)) {
+								// enemys.remove(x);
+								laser.destroy();
+								value.destroy();
+							}
+						}
+					}
 				}
-				Log.d(TAG_LASER, "Move Laser x: " +  laser.getCoordinates().x0 + " y: " +  laser.getCoordinates().y0);
-				
+
+				Log.d(TAG_LASER, "Move Laser x: " + laser.getCoordinates().x0
+						+ " y: " + laser.getCoordinates().y0);
+
 				try {
 					sleep(LASER_SPEED);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private class EnemyThread extends Thread {
+
+		private int direction_y;
+		private int direction_x;
+
+		public EnemyThread() {
+			direction_y = 1;
+			direction_x = 1;
+		}
+
+		@Override
+		public void run() {
+			Log.d(TAG_LASER, "Start Laser Thread");
+			while (true) {
+				boolean change = false;
+				boolean changeX = false;
+
+				for (EnemyShip value : enemys) {
+					int y0 = value.getCoordinates().y0 + direction_y;
+					int y1 = value.getCoordinates().y1 + direction_y;
+
+					if (direction_y == -1 && y0 < 0) {
+						change = true;
+						break;
+					}
+
+					if (direction_y == 1 && y1 > 23) {
+						change = true;
+						break;
+					}
+
+					int x0 = value.getCoordinates().x0 + direction_x;
+					int x1 = value.getCoordinates().x1 + direction_x;
+
+					if (direction_x == -1 && x0 <= 0) {
+						changeX = true;
+					}
+
+					if (direction_x == 1 && x1 >= BOTTOM_BORDER) {
+						changeX = true;
+					}
+
+				}
+
+				if (change) {
+
+					if (changeX) {
+						if (direction_x == 1) {
+							direction_x = -1;
+						} else {
+							direction_x = 1;
+						}
+					}
+
+					for (EnemyShip value : enemys) {
+						Log.d(TAG_LASER,
+								"Move Laser x: " + value.getCoordinates().x0
+										+ " y: " + value.getCoordinates().y0);
+						value.getCoordinates().move(direction_x, 0);
+					}
+
+					if (direction_y == 1) {
+						direction_y = -1;
+					} else {
+						direction_y = 1;
+					}
+
+				} else {
+					for (EnemyShip value : enemys) {
+						Log.d(TAG_LASER,
+								"Move Laser x: " + value.getCoordinates().x0
+										+ " y: " + value.getCoordinates().y0);
+						value.getCoordinates().move(0, direction_y);
+					}
+				}
+
+				try {
+					sleep(ENEMY_SPEED);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
