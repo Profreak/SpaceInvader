@@ -1,4 +1,4 @@
-package de.l_infotech.spaceinvader;
+package de.l_infotech.spaceinvader.connection;
 
 import android.app.Activity;
 
@@ -7,7 +7,7 @@ import android.app.Activity;
  * 
  * @author Ludwig Biermann
  * @version 1.0
- *
+ * 
  */
 public interface DisplayConnection {
 
@@ -24,7 +24,7 @@ public interface DisplayConnection {
 	 * @return {true} if Connection is enable
 	 */
 	public boolean isEnable();
-	
+
 	/**
 	 * Starts the Adpater
 	 * 
@@ -33,7 +33,7 @@ public interface DisplayConnection {
 	 * @return true if success
 	 */
 	public boolean startAdapter(Activity activity);
-	
+
 	/**
 	 * connects to a adress
 	 * 
@@ -46,7 +46,8 @@ public interface DisplayConnection {
 	/**
 	 * sends the Matrix to the Display
 	 * 
-	 * @param matrixInMessage to show
+	 * @param matrixInMessage
+	 *            to show
 	 */
 	public void send(byte[] matrixInMessage);
 }

@@ -1,7 +1,8 @@
 package de.l_infotech.spaceinvader;
 
-import de.l_infotech.spaceinvader.bluetooth.BluetoothConnector;
-import de.l_infotech.spaceinvader.game.ScoreListener;
+import de.l_infotech.spaceinvader.connection.BluetoothConnector;
+import de.l_infotech.spaceinvader.connection.DisplayConnection;
+import de.l_infotech.spaceinvader.game.GameStatusListener;
 import de.l_infotech.spaceinvader.game.SpaceEngine;
 import android.app.Activity;
 import android.content.Context;
@@ -24,7 +25,7 @@ import android.widget.Toast;
  * @version 1.0
  * 
  */
-public class GameActivity extends Activity implements ScoreListener {
+public class GameActivity extends Activity implements GameStatusListener {
 
 	// Debugging Information
 	private static final String TAG = GameActivity.class.getSimpleName();
@@ -119,7 +120,7 @@ public class GameActivity extends Activity implements ScoreListener {
 					ship.setVisibility(ImageView.VISIBLE);
 					ship.bringToFront();
 					livesLayout.addView(ship, l);
-					
+
 				}
 			}
 		});
@@ -134,6 +135,11 @@ public class GameActivity extends Activity implements ScoreListener {
 
 			}
 		});
+	}
+
+	@Override
+	public void gameOver() {
+		this.returnToMenu();
 	}
 
 }

@@ -13,20 +13,20 @@ import android.widget.Button;
  * 
  * @author Ludwig Biermannn
  * @version 1.0
- *
+ * 
  */
-public class HelpActivity extends Activity{
-	
+public class HelpActivity extends Activity {
+
 	private Button back;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_help);
-		
+
 		back = (Button) this.findViewById(R.id.back);
 		back.setOnClickListener(new BackButtonListener());
-		
+
 	}
 
 	@Override

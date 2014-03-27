@@ -1,4 +1,4 @@
-package de.l_infotech.spaceinvader.bluetooth;
+package de.l_infotech.spaceinvader.connection;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,7 +10,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.util.Log;
-import de.l_infotech.spaceinvader.DisplayConnection;
 
 /**
  * 
@@ -33,7 +32,7 @@ public class BluetoothConnector implements DisplayConnection {
 	private OutputStream outStream = null;
 
 	/**
-	 * creats a new BluetoothConnector
+	 * creates a new BluetoothConnector
 	 */
 	public BluetoothConnector() {
 		adapter = BluetoothAdapter.getDefaultAdapter();

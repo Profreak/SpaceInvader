@@ -69,6 +69,7 @@ public class MainMenuActivity extends Activity {
 		}
 
 	}
+
 	/**
 	 * 
 	 * @author Ludwig Biermann
