@@ -1,10 +1,5 @@
 package de.l_infotech.spaceinvader;
 
-import de.l_infotech.spaceinvader.connection.BluetoothConnector;
-import de.l_infotech.spaceinvader.connection.DisplayConnection;
-import de.l_infotech.spaceinvader.game.GameStatusListener;
-import de.l_infotech.spaceinvader.game.SpaceEngine;
-import de.l_infotech.spaceinvader.game.sound.Soundboard;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +13,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import de.l_infotech.spaceinvader.connection.BluetoothConnector;
+import de.l_infotech.spaceinvader.connection.DisplayConnection;
+import de.l_infotech.spaceinvader.game.GameStatusListener;
+import de.l_infotech.spaceinvader.game.SpaceEngine;
+import de.l_infotech.spaceinvader.game.sound.Soundboard;
+import de.l_infotech.spaceinvader.storage.StaticIO;
 
 /**
  * This is the game themself
@@ -31,6 +32,7 @@ public class GameActivity extends Activity implements GameStatusListener {
 	// Debugging Information
 	private static final String TAG = GameActivity.class.getSimpleName();
 	private static final String TAG_STATUS_UPDATE = "StatusUpdate";
+	public static final String HIGHSCORE_FILENAME = "highscore";
 
 	// Game Variables
 	private DisplayConnection connection;
@@ -40,7 +42,7 @@ public class GameActivity extends Activity implements GameStatusListener {
 	private TextView scoreView;
 	private TextView stageView;
 	private LinearLayout livesLayout;
-	
+
 	// Sensor
 	private SensorManager sm;
 
@@ -83,7 +85,7 @@ public class GameActivity extends Activity implements GameStatusListener {
 
 		Log.d(TAG, "Set Up Audio");
 		Soundboard sb = new Soundboard(this);
-		
+
 		Log.d(TAG, "Set Up Game");
 		game = new SpaceEngine(connection, sb);
 		this.findViewById(R.id.fireButton).setOnTouchListener(game);
@@ -114,6 +116,7 @@ public class GameActivity extends Activity implements GameStatusListener {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				scoreView.setText("Score: " + score);
+
 			}
 		});
 	}
@@ -154,13 +157,14 @@ public class GameActivity extends Activity implements GameStatusListener {
 	public void gameOver() {
 		connection.close();
 		sm.unregisterListener(game);
+		StaticIO.saveScore(game.getScore(), this.getApplicationContext());
 		this.returnToMenu();
 	}
 
 	@Override
 	public void onBackPressed() {
-	    super.onBackPressed();
-	    this.gameOver();
+		super.onBackPressed();
+		this.gameOver();
 	}
 
 	@Override
@@ -168,11 +172,11 @@ public class GameActivity extends Activity implements GameStatusListener {
 		super.onResume();
 		game.continueGame();
 	}
-	
+
 	@Override
 	public void onPause() {
 		super.onPause();
 		game.pause();
 	}
-	
+
 }

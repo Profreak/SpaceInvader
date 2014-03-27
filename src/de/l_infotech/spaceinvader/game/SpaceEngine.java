@@ -41,7 +41,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	// Player
 	public static final int START_PLAYER_X = 20;
 	public static final int START_PLAYER_Y = 5;
-	public static final int START_PLAYER_LIVES = 3;
+	public static final int START_PLAYER_LIVES = 8;
 
 	// Ships
 	public static final int SHIP_WIDTH = 3;
@@ -59,6 +59,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	// Score
 	private static final int ENEMY_VALUE = 10;
+	private static final int STAGE_VALUE = 10;
 
 	// Speed
 	private static final int ENEMY_SPEED_FAKTOR = 100; // higher -> faster per
@@ -68,7 +69,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	public static final int LASER_SPEED = 100; // lower -> faster
 	private static final int SHOOT_DELAY = 10 * LASER_SPEED;
 
-	public static final int GAME_SPEED = 100; // lower -> faster
+	public static final int GAME_SPEED = 80; // lower -> faster
 
 	public static final int GAME_INITIALISATION_WAIT_TIME = 1000; // lower ->
 																	// faster
@@ -90,7 +91,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	// Audio
 	private Soundboard sb;
-	
+
 	// Sensor
 	private double sensorDiff = 0.0;
 
@@ -107,11 +108,11 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	 * 
 	 * @param connection
 	 *            the way of Connection to the Display
-	 * @param sb 
+	 * @param sb
 	 */
 	public SpaceEngine(DisplayConnection connection, Soundboard sb) {
 		Log.d(TAG, "set up the game");
-		
+
 		Log.d(TAG, "set up the display connection");
 		this.connection = connection;
 
@@ -158,7 +159,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 				if (!player.isAlive()) {
 					isRunning = false;
 					destroyPlayer();
-					sb.playSound(Soundboard.EXPLOSION);
+//					sb.playSound(Soundboard.EXPLOSION);
 
 				}
 
@@ -178,6 +179,8 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 				// alle enemys killed-> next stage
 				if (enemys.size() == 0) {
 					stage++;
+					score += STAGE_VALUE;
+					notifyScoreListener();
 					notifyStageListener();
 					initEnemy();
 				}
@@ -262,8 +265,6 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 								Log.d(TAG_LASER, "HIT");
 								value.destroy();
 								laser.destroy();
-								score += ENEMY_VALUE;
-								notifyScoreListener();
 							}
 						}
 					} else {
@@ -273,7 +274,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 							Log.d(TAG_LASER, "HIT at Player");
 							player.destroy();
 							laser.destroy();
-							score += ENEMY_VALUE;
+							sb.playSound(Soundboard.EXPLOSION);
 							notifyLivesListener();
 						}
 					}
@@ -360,13 +361,15 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 							}
 						}
 						// Move
-						for (EnemyShip value : enemys) {
-							Log.d(TAG_ENEMY,
-									"Move Enemy x: "
-											+ value.getCoordinates().x0
-											+ " y: "
-											+ value.getCoordinates().y0);
-							value.getCoordinates().move(direction_x, 0);
+						synchronized (enemys) {
+							for (EnemyShip value : enemys) {
+								Log.d(TAG_ENEMY,
+										"Move Enemy x: "
+												+ value.getCoordinates().x0
+												+ " y: "
+												+ value.getCoordinates().y0);
+								value.getCoordinates().move(direction_x, 0);
+							}
 						}
 
 						if (direction_y == 1) {
@@ -406,8 +409,8 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		float x = event.values[0];
-		float y = event.values[1];
+		float x = event.values[1];
+		float y = event.values[0];
 		sensorDiff = Math.atan2(x, y) / (Math.PI / 180);
 
 	}
@@ -504,7 +507,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	private void movePlayer() {
 		this.insertGamefield(player.getGraphics(), player.getCoordinates().x0,
 				player.getCoordinates().y0);
-		int move_y = (int) -Math.round(sensorDiff / SENSOR_SENSITIVITY);
+		int move_y = (int) Math.round(sensorDiff / SENSOR_SENSITIVITY);
 		this.player.getCoordinates().move(0, move_y);
 	}
 
@@ -547,6 +550,8 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 							value.getCoordinates().x0,
 							value.getCoordinates().y0);
 					enemys.remove(z);
+					score += ENEMY_VALUE;
+					notifyScoreListener();
 					sb.playSound(Soundboard.EXPLOSION);
 				}
 			}
@@ -611,13 +616,13 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		cur = StaticMatrix.two12;
 		this.insertGamefield(cur, 0, 0);
-		
+
 		cur = StaticMatrix.two12;
 		this.insertGamefield(cur, 12, 0);
-		
+
 		cur = StaticMatrix.two12;
 		this.insertGamefield(cur, 0, 12);
-		
+
 		cur = StaticMatrix.two12;
 		this.insertGamefield(cur, 12, 12);
 		this.sendField(field);
@@ -629,10 +634,10 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		}
 		cur = StaticMatrix.one12;
 		this.insertGamefield(cur, 0, 0);
-		
+
 		cur = StaticMatrix.one12;
 		this.insertGamefield(cur, 12, 0);
-		
+
 		cur = StaticMatrix.one12;
 		this.insertGamefield(cur, 0, 12);
 
@@ -647,10 +652,10 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		}
 		cur = StaticMatrix.null12;
 		this.insertGamefield(cur, 0, 0);
-		
+
 		cur = StaticMatrix.null12;
 		this.insertGamefield(cur, 12, 0);
-		
+
 		cur = StaticMatrix.null12;
 		this.insertGamefield(cur, 0, 12);
 
@@ -865,5 +870,14 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 			e.printStackTrace();
 		}
 
+	}
+
+	/**
+	 * Gives the current score back
+	 * 
+	 * @return the current score
+	 */
+	public int getScore() {
+		return score;
 	}
 }

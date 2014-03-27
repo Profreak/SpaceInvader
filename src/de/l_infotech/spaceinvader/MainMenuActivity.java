@@ -1,16 +1,18 @@
 package de.l_infotech.spaceinvader;
 
-import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
+import de.l_infotech.spaceinvader.storage.StaticIO;
 
 /**
  * This class holds the Main Menu of the game.
@@ -28,7 +30,7 @@ public class MainMenuActivity extends Activity {
 	private Button newgame;
 	private Button help;
 	private Button exit;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -37,7 +39,9 @@ public class MainMenuActivity extends Activity {
 		newgame = (Button) this.findViewById(R.id.newgame);
 		help = (Button) this.findViewById(R.id.help);
 		exit = (Button) this.findViewById(R.id.exit);
-
+		TextView highscore = (TextView) this.findViewById(R.id.highscore);
+		highscore.setText("Highscore: " + StaticIO.loadScore(getApplicationContext()));
+		
 		newgame.setOnClickListener(new NewGameListener());
 		help.setOnClickListener(new HelpListener());
 		exit.setOnClickListener(new ExitListener());

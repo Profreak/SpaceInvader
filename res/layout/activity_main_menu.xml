@@ -45,13 +45,22 @@
             android:text="@string/exit" />
 
     </RelativeLayout>
-
+    
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/autor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:text="@string/impressum"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/highscore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title"
+        android:layout_centerHorizontal="true"
         android:text="@string/impressum"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 

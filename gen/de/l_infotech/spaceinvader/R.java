@@ -26,11 +26,13 @@ public final class R {
         public static final int spaceship_pic=0x7f020002;
     }
     public static final class id {
-        public static final int action_settings=0x7f09000e;
+        public static final int action_settings=0x7f09000f;
+        public static final int autor=0x7f09000d;
         public static final int back=0x7f090006;
         public static final int exit=0x7f09000c;
         public static final int fireButton=0x7f090005;
         public static final int help=0x7f09000b;
+        public static final int highscore=0x7f09000e;
         public static final int information_layout=0x7f090000;
         public static final int lives=0x7f090004;
         public static final int menu_box=0x7f090009;
@@ -39,7 +41,6 @@ public final class R {
         public static final int stage=0x7f090003;
         public static final int status=0x7f090001;
         public static final int text=0x7f090008;
-        public static final int textView1=0x7f09000d;
         public static final int title=0x7f090007;
     }
     public static final class layout {
