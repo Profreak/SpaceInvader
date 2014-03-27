@@ -12,7 +12,7 @@
         android:text="@string/back" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/back"
@@ -24,9 +24,9 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/address1"
+        android:id="@+id/text"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingBottom="10dp"
@@ -36,8 +36,6 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/back"
         android:gravity="left"
-        android:lines="4"
-        android:maxLines="4"
         android:text="@string/description" />
 
 

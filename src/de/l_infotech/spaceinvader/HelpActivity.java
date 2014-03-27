@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 
 /**
  * This is the game them self
@@ -27,6 +28,18 @@ public class HelpActivity extends Activity {
 		back = (Button) this.findViewById(R.id.back);
 		back.setOnClickListener(new BackButtonListener());
 
+		String text = "Space Invader for the Connection Machine \n";
+		text = "The connection to the machine will be over Bluetooth.\n";
+		text += "\n";
+		text += "Target: Destroy the enemy fighter on the top.\n";
+		text += "\n";
+		text += "Control:\n";
+		text += "- Press on the Touch Screen to shoot.\n";
+		text += "- Tilt your smartphone to move your space ship left or right\n";
+		text += "\n";
+		text += "HAVE FUN!\n";
+		TextView view = (TextView) this.findViewById(R.id.text);
+		view.setText(text);
 	}
 
 	@Override

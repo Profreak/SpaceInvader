@@ -50,4 +50,10 @@ public interface DisplayConnection {
 	 *            to show
 	 */
 	public void send(byte[] matrixInMessage);
+	
+	/**
+	 * close the connection
+	 */
+	
+	public void close();
 }

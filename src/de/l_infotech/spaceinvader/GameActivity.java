@@ -4,6 +4,7 @@ import de.l_infotech.spaceinvader.connection.BluetoothConnector;
 import de.l_infotech.spaceinvader.connection.DisplayConnection;
 import de.l_infotech.spaceinvader.game.GameStatusListener;
 import de.l_infotech.spaceinvader.game.SpaceEngine;
+import de.l_infotech.spaceinvader.game.sound.Soundboard;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +40,15 @@ public class GameActivity extends Activity implements GameStatusListener {
 	private TextView scoreView;
 	private TextView stageView;
 	private LinearLayout livesLayout;
+	
+	// Sensor
+	private SensorManager sm;
+
+	// Mac of my own Lenovo Bluetooth Adapter
+	public final String address = "20:16:D8:0F:8E:B0";
+
+	// TeCo Rasperry Pi Bluetooth MAC
+	// private static String address = "5C:F3:70:02:D7:C7";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,14 +75,17 @@ public class GameActivity extends Activity implements GameStatusListener {
 				returnToMenu();
 			}
 		}
+		connection.connect(address);
 
 		Log.d(TAG, "Set Up Sensor Manager");
-		SensorManager sm = (SensorManager) this
-				.getSystemService(Context.SENSOR_SERVICE);
+		sm = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
 		Sensor s = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
+		Log.d(TAG, "Set Up Audio");
+		Soundboard sb = new Soundboard(this);
+		
 		Log.d(TAG, "Set Up Game");
-		game = new SpaceEngine(connection);
+		game = new SpaceEngine(connection, sb);
 		this.findViewById(R.id.fireButton).setOnTouchListener(game);
 		sm.registerListener(game, s, SensorManager.SENSOR_DELAY_GAME);
 		game.addScoreListener(this);
@@ -113,7 +126,7 @@ public class GameActivity extends Activity implements GameStatusListener {
 				livesLayout.removeAllViews();
 				for (int x = 0; x < lives; x++) {
 					ImageView ship = new ImageView(getApplicationContext());
-					ship.setImageResource(R.drawable.ic_launcher);
+					ship.setImageResource(R.drawable.spaceship_pic);
 					LayoutParams l = new LayoutParams(
 							LayoutParams.WRAP_CONTENT,
 							LayoutParams.WRAP_CONTENT);
@@ -139,7 +152,27 @@ public class GameActivity extends Activity implements GameStatusListener {
 
 	@Override
 	public void gameOver() {
+		connection.close();
+		sm.unregisterListener(game);
 		this.returnToMenu();
 	}
 
+	@Override
+	public void onBackPressed() {
+	    super.onBackPressed();
+	    this.gameOver();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		game.continueGame();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		game.pause();
+	}
+	
 }

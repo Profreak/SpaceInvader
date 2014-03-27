@@ -109,8 +109,23 @@ public class BluetoothConnector implements DisplayConnection {
 					outStream.write(matrixInMessage);
 				} catch (IOException e) {
 					e.printStackTrace();
+					Log.e(TAG, "faild to send Matrix.", e);
 				}
 			}
+		}
+	}
+
+	@Override
+	public void close() {
+		Log.d(TAG, "close Bluetooth.");
+		
+		// close bluetooth
+		try {
+			socket.close();
+			outStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			Log.e(TAG, "faild to close Bluetooth.", e);
 		}
 	}
 }

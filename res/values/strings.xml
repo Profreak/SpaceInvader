@@ -13,7 +13,5 @@
     <string name="back">zurück</string>
     <string name="quit_question">Wollen sie das Spiel wirklich verlassen?</string>
     <string name="description">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
-	<string name="des_fire">"the fire button"</string>
-	<string name="test">test string</string>
 	
 </resources>
