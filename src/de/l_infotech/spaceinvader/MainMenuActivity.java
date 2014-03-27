@@ -12,6 +12,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+import de.l_infotech.spaceinvader.connection.BluetoothConnector;
+import de.l_infotech.spaceinvader.connection.DisplayConnection;
 import de.l_infotech.spaceinvader.storage.StaticIO;
 
 /**
@@ -45,9 +48,28 @@ public class MainMenuActivity extends Activity {
 		newgame.setOnClickListener(new NewGameListener());
 		help.setOnClickListener(new HelpListener());
 		exit.setOnClickListener(new ExitListener());
-
+		
+	
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		Log.d(TAG, "Check Connection");
+		DisplayConnection connection = new BluetoothConnector();
+		if (!connection.isSupported()) {
+			Toast.makeText(getApplicationContext(),
+					"buy a new Device .... with Bluetooth!", Toast.LENGTH_LONG)
+					.show();
+		}
+		if (!connection.isEnable()) {
+			if (!connection.startAdapter(this)) {
+				Toast.makeText(getApplicationContext(), "unexpected error",
+						Toast.LENGTH_LONG).show();
+			}
+		}
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

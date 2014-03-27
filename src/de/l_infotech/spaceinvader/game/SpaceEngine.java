@@ -75,7 +75,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 																	// faster
 																	// start
 
-	public static final int SENSOR_SENSITIVITY = 100; // lower -> more controll
+	public static final int SENSOR_SENSITIVITY = 120; // lower -> more controll
 
 	// Space Objects
 	private PlayerShip player;

@@ -170,7 +170,11 @@ public class GameActivity extends Activity implements GameStatusListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		game.continueGame();
+		if (!connection.isEnable()) {
+			gameOver();
+		}else {
+			game.continueGame();
+		}
 	}
 
 	@Override
