@@ -63,6 +63,7 @@ public final class R {
         public static final int cancel=0x7f060008;
         public static final int confirm=0x7f060007;
         public static final int connect=0x7f060006;
+        public static final int desc_fire_button=0x7f06000c;
         public static final int description=0x7f06000b;
         public static final int exit=0x7f060004;
         public static final int help=0x7f060003;

@@ -62,6 +62,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerHorizontal="true"
         android:background="#580808"
-        android:src="@drawable/fire_font" />
+        android:src="@drawable/fire_font"
+        android:contentDescription="@string/desc_fire_button" />
 
 </RelativeLayout>
