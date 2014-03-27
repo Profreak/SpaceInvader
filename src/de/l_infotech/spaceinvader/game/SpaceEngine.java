@@ -76,6 +76,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	// Game Environment
 	private byte[][] field;
 	private int score;
+	private List<ScoreListener> scoreListener;
 	
 	// Sensor
 	private double sensorDiff = 0.0;
@@ -105,6 +106,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		enemys = new LinkedList<EnemyShip>();
 
 		score = 0;
+		scoreListener = new LinkedList<ScoreListener>();
 
 		Log.d(TAG, "set up player and enemys");
 		player = new PlayerShip(START_PLAYER_X, START_PLAYER_Y, SHIP_WIDTH,
@@ -200,6 +202,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 						value.destroy();
 						laser.destroy();
 						score++;
+						notifyScoreListener();
 					}
 				}
 				
@@ -343,6 +346,25 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * add a Score Listener
+	 * 
+	 * @param listener the new Listener
+	 */
+	public void addScoreListener(ScoreListener listener){
+		this.scoreListener.add(listener);
+		this.notifyScoreListener();
+	}
+	
+	/**
+	 * notify all Score listener
+	 */
+	private void notifyScoreListener(){
+		for(ScoreListener value: scoreListener){
+			value.setScore(score);
+		}
 	}
 	
 	// Helper methods

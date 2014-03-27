@@ -3,38 +3,43 @@ package de.l_infotech.spaceinvader.bluetooth;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
-import de.l_infotech.spaceinvader.DisplayConnection;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.util.Log;
+import de.l_infotech.spaceinvader.DisplayConnection;
 
+/**
+ * 
+ * This class handels a Display Connection via bluetooth
+ * 
+ * @author Ludwig Biermann
+ * @version 1.0
+ * 
+ */
 public class BluetoothConnector implements DisplayConnection {
 
+	// debugging
 	private final String TAG = BluetoothConnector.class.getSimpleName();
 
+	// needed vars
 	private BluetoothAdapter adapter;
 	private BluetoothSocket socket;
 	private int REQUEST_ENABLE_BT = 10;
 	private int port = 16;
 	private OutputStream outStream = null;
-	private String address;
 
-	private int maxRes = 24;
-
+	/**
+	 * creats a new BluetoothConnector
+	 */
 	public BluetoothConnector() {
 		adapter = BluetoothAdapter.getDefaultAdapter();
 	}
 
-	/**
-	 * Checks if Bluetooth is possible
-	 * 
-	 * @return true} if device does support Bluetooth
-	 */
+	@Override
 	public boolean isSupported() {
 		if (adapter != null) {
 			return true;
@@ -42,22 +47,12 @@ public class BluetoothConnector implements DisplayConnection {
 		return false;
 	}
 
-	/**
-	 * Try whether the Adapter is enable
-	 * 
-	 * @return true} if Adapter is enable
-	 */
+	@Override
 	public boolean isEnable() {
 		return adapter.isEnabled();
 	}
 
-	/**
-	 * Starts the Bluetooth Adpater
-	 * 
-	 * @param activity
-	 *            the current Activity
-	 * @return true if success
-	 */
+	@Override
 	public boolean startAdapter(Activity activity) {
 		Intent enableBtIntent = new Intent(
 				BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -65,22 +60,13 @@ public class BluetoothConnector implements DisplayConnection {
 		return true;
 	}
 
-	
-
-	/**
-	 * connects to a adress
-	 * 
-	 * @param address
-	 *            the mac of the bluethooth device
-	 * @return true if success
-	 */
+	@Override
 	public boolean connect(String address) {
 
-		this.address = address;
+		Log.d(TAG, "Connect to adress");
 		try {
 			// Get device object for the address.
 			BluetoothDevice devices = adapter.getRemoteDevice(address);
-
 			Method m = devices.getClass().getMethod("createRfcommSocket",
 					new Class[] { int.class });
 			socket = (BluetoothSocket) m.invoke(devices, port);
@@ -94,6 +80,7 @@ public class BluetoothConnector implements DisplayConnection {
 		Log.d(TAG, "Cancel Discovery");
 		adapter.cancelDiscovery();
 
+		Log.d(TAG, "Block Connect");
 		try {
 			// Blocking connect() call.
 			socket.connect();
@@ -102,6 +89,7 @@ public class BluetoothConnector implements DisplayConnection {
 			Log.e(TAG, "Failed to open socket.", e);
 		}
 
+		Log.d(TAG, "Create Output Stream");
 		// Create output stream to send data to the server.
 		try {
 			outStream = socket.getOutputStream();
@@ -115,14 +103,15 @@ public class BluetoothConnector implements DisplayConnection {
 
 	@Override
 	public void send(byte[] matrixInMessage) {
-		synchronized(outStream) {
-		synchronized(matrixInMessage) {
-		try {
-			outStream.write(matrixInMessage);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		}
+		Log.d(TAG, "Send Matrix");
+		synchronized (outStream) {
+			synchronized (matrixInMessage) {
+				try {
+					outStream.write(matrixInMessage);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 }
