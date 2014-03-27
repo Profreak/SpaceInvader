@@ -30,6 +30,7 @@ public class PlayerShip implements SpaceObject {
 		destroyGrafik = new byte[width][height];
 		grafik = size3;
 		destroyGrafik = size3;
+		this.lives = lives;
 	}
 	
 	/**

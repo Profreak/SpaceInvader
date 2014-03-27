@@ -76,6 +76,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	// Game Environment
 	private byte[][] field;
 	private int score;
+	private int stage;
 	private List<ScoreListener> scoreListener;
 	
 	// Sensor
@@ -86,6 +87,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	// Helper Variables
 	private boolean justShot = false;
+	private boolean isRunning = false;
 
 	/**
 	 * Creats a new Space Engine
@@ -124,7 +126,9 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		EnemyThread t = new EnemyThread();
 		t.start();
 
-		while (true) {
+		isRunning = true;
+		
+		while (isRunning) {
 			// clear the Field
 			field = new byte[MAX_RESOLUTION][MAX_RESOLUTION];
 
@@ -152,6 +156,8 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 				e.printStackTrace();
 			}
 		}
+		
+		this.showGameOver();
 	}
 
 	/**
@@ -356,6 +362,8 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	public void addScoreListener(ScoreListener listener){
 		this.scoreListener.add(listener);
 		this.notifyScoreListener();
+		this.notifyStageListener();
+		this.notifyLivesListener();
 	}
 	
 	/**
@@ -364,6 +372,25 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	private void notifyScoreListener(){
 		for(ScoreListener value: scoreListener){
 			value.setScore(score);
+		}
+	}
+
+	/**
+	 * notify all Stage listener
+	 */
+	private void notifyStageListener(){
+		for(ScoreListener value: scoreListener){
+			value.setStage(stage);
+		}
+	}
+	
+
+	/**
+	 * notify all Live listener
+	 */
+	private void notifyLivesListener(){
+		for(ScoreListener value: scoreListener){
+			value.setPlayerLives(player.getLives());
 		}
 	}
 	
@@ -416,6 +443,35 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	}
 	
 	/**
+	 * shows GAME OVER
+	 */
+	private void showGameOver(){
+		field = new byte[MAX_RESOLUTION][MAX_RESOLUTION];
+		this.insertGamefield(StaticMatrix.GAME_OVER, 0, 0);
+		this.sendField(field);
+		
+		try {
+			sleep(GAME_INITIALISATION_WAIT_TIME);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		field = new byte[MAX_RESOLUTION][MAX_RESOLUTION];
+		this.sendField(field);
+
+		try {
+			sleep(GAME_INITIALISATION_WAIT_TIME);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		field = new byte[MAX_RESOLUTION][MAX_RESOLUTION];
+		this.insertGamefield(StaticMatrix.GAME_OVER, 0, 0);
+		this.sendField(field);
+		
+	}
+	
+	/**
 	 * starts the countdown 
 	 */
 	private void initGame() {
@@ -425,7 +481,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		
 		cur = StaticMatrix.three12;
 		this.insertGamefield(cur, 0, 0);
-		this.sendField(cur);
+		this.sendField(field);
 		
 		try {
 			sleep(GAME_INITIALISATION_WAIT_TIME);
@@ -435,7 +491,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		cur = StaticMatrix.two12;
 		this.insertGamefield(cur, 0, 0);
-		this.sendField(cur);
+		this.sendField(field);
 
 		try {
 			sleep(GAME_INITIALISATION_WAIT_TIME);
@@ -445,7 +501,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		cur = StaticMatrix.one12;
 		this.insertGamefield(cur, 0, 0);
-		this.sendField(cur);
+		this.sendField(field);
 
 		try {
 			sleep(GAME_INITIALISATION_WAIT_TIME);
@@ -455,7 +511,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		cur = StaticMatrix.null12;
 		this.insertGamefield(cur, 0, 0);
-		this.sendField(cur);
+		this.sendField(field);
 
 		try {
 			sleep(GAME_INITIALISATION_WAIT_TIME);
