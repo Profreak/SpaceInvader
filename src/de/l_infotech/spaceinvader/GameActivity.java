@@ -20,7 +20,7 @@ import android.widget.Toast;
  */
 public class GameActivity extends Activity{
 
-	private WirelessConnection connection;
+	private DisplayConnection connection;
 	private SpaceEngine game;
 	
 	@Override

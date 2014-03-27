@@ -26,7 +26,7 @@ public class Laser implements SpaceObject {
 	 * @param t thickness of the Space Ship
 	 */
 	public Laser(int x, int y, int t) {
-		box = new Box(x, x  + t, y, y + 2*t);
+		box = new Box(x, x, y, y + t);
 		alive = true;
 		grafik = new byte[2][1]; // grafik hack
 		

@@ -24,16 +24,18 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int action_settings=0x7f080009;
-        public static final int address1=0x7f080003;
-        public static final int back=0x7f080001;
-        public static final int exit=0x7f080008;
+        public static final int action_settings=0x7f08000b;
+        public static final int address1=0x7f080005;
+        public static final int back=0x7f080003;
+        public static final int exit=0x7f08000a;
         public static final int fireButton=0x7f080000;
-        public static final int help=0x7f080007;
-        public static final int menu_box=0x7f080005;
-        public static final int newgame=0x7f080006;
-        public static final int textView1=0x7f080002;
-        public static final int title=0x7f080004;
+        public static final int help=0x7f080009;
+        public static final int information=0x7f080001;
+        public static final int menu_box=0x7f080007;
+        public static final int newgame=0x7f080008;
+        public static final int score=0x7f080002;
+        public static final int textView1=0x7f080004;
+        public static final int title=0x7f080006;
     }
     public static final class layout {
         public static final int activity_game=0x7f030000;

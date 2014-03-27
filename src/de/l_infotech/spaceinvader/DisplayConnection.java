@@ -1,7 +1,7 @@
 package de.l_infotech.spaceinvader;
 
 import android.app.Activity;
-public interface WirelessConnection {
+public interface DisplayConnection {
 
 	
 	public boolean isSupported();

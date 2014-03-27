@@ -3,11 +3,13 @@ package de.l_infotech.spaceinvader.game;
 public class EnemyShip implements SpaceObject {
 	
 	// Annahme links oben ist 0/0
+	private static int ID_COUNTER = 0;
 	private Box box;
 	private byte[][] grafik;
 	private byte[][] destroyGrafik;
 	private boolean alive;
 	private byte a = SpaceEngine.SHINE;
+	private int id;
 	
 	private byte[][] size3 = new byte[][]{
 			{a,0,a},
@@ -35,6 +37,12 @@ public class EnemyShip implements SpaceObject {
 		
 		grafik = size3;
 		destroyGrafik = size3_d;
+		id = ID_COUNTER;
+		ID_COUNTER++;
+	}
+	
+	public int getId(){
+		return id;
 	}
 	
 	/**

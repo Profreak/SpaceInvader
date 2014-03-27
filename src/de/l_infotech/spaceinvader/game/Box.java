@@ -47,7 +47,7 @@ public class Box {
 	//
 	public boolean isHit(int x, int y){
 		if(x0 <= x && x <= x1) {
-			if(y0 <= x && x <= y1) {
+			if(y0 <= y && y <= y1) {
 				Log.d("HIT", "HIT at x: "+ x + " y: " + y);
 				Log.d("HIT", "HIT at x: "+ x0 + " y: " + x1);
 				Log.d("HIT", "HIT at x: "+ y0 + " y: " + y1);
@@ -64,12 +64,14 @@ public class Box {
 	 * @param y y Coordinate
 	 */
 	public boolean move(int x, int y){
+		Log.d(TAG, "move! x: "+  x + " y: " + y);
 		if((x0+x) >= 0 && (y0+y) >= 0 && (x1+x) < SpaceEngine.MAX_RESOLUTION && (y1+y) < SpaceEngine.MAX_RESOLUTION){
 			Log.d(TAG, "move x: " + x + " y: " + y);
 			x0 += x;
 			x1 += x;
 			y0 += y;
 			y1 += y;
+			Log.d(TAG, "after move x: " + x + " y: " + y);
 			return true;
 		}
 		return false;

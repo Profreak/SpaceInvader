@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import de.l_infotech.spaceinvader.WirelessConnection;
+import de.l_infotech.spaceinvader.DisplayConnection;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -13,7 +13,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.util.Log;
 
-public class BluetoothConnector implements WirelessConnection {
+public class BluetoothConnector implements DisplayConnection {
 
 	private final String TAG = BluetoothConnector.class.getSimpleName();
 
