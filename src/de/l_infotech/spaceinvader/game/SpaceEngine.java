@@ -54,6 +54,9 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	// Graphics
 	public static final byte SHINE = (byte) 255;
+	
+	// Score
+	private static final int ENEMY_VALUE = 10; 
 
 	// Speed 
 	private static final int ENEMY_SPEED_FAKTOR = 100;  // higher -> faster per enemy
@@ -108,6 +111,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		enemys = new LinkedList<EnemyShip>();
 
 		score = 0;
+		stage = 1;
 		scoreListener = new LinkedList<ScoreListener>();
 
 		Log.d(TAG, "set up player and enemys");
@@ -201,16 +205,27 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 							+ " y: " + laser.getCoordinates().y0);
 				}
 
+				if(direction == 1){
 				// check wehter hits a enemy
 				for(EnemyShip value: enemys){
 					if(value.getCoordinates().isHit(laser.getCoordinates().x0, laser.getCoordinates().y0)){
 						Log.d(TAG_LASER, "HIT");
 						value.destroy();
 						laser.destroy();
-						score++;
+						score += ENEMY_VALUE;
 						notifyScoreListener();
 					}
 				}
+				} else{
+					if(player.getCoordinates().isHit(laser.getCoordinates().x0, laser.getCoordinates().y0)){
+						Log.d(TAG_LASER, "HIT at Player");
+						player.destroy();
+						laser.destroy();
+						score += ENEMY_VALUE;
+						notifyLivesListener();
+					}
+				}
+				
 				
 				// wait for the next step
 				try {
