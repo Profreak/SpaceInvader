@@ -215,3 +215,5 @@ pip-log.txt
 .mr.developer.cfg
 gen/de/l_infotech/spaceinvader/BuildConfig.java
 gen/de/l_infotech/spaceinvader/R.java
+/gen
+/assets
