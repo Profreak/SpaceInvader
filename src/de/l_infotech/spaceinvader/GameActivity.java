@@ -189,4 +189,9 @@ public class GameActivity extends Activity implements GameStatusListener {
 		game.pause();
 	}
 
+	@Override
+	public void onStop() {
+		super.onStop();
+		this.gameOver();
+	}
 }
