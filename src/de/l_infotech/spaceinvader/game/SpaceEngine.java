@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.Button;
 import de.l_infotech.spaceinvader.connection.DisplayConnection;
 import de.l_infotech.spaceinvader.game.components.StaticMatrix;
 import de.l_infotech.spaceinvader.game.sound.Soundboard;
