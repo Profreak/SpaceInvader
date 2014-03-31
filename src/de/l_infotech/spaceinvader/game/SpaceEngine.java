@@ -10,10 +10,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.Button;
 import de.l_infotech.spaceinvader.connection.DisplayConnection;
 import de.l_infotech.spaceinvader.game.components.StaticMatrix;
 import de.l_infotech.spaceinvader.game.sound.Soundboard;
@@ -76,6 +78,10 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 																	// start
 
 	public static final int SENSOR_SENSITIVITY = 120; // lower -> more controll
+	
+	
+	public static final long[] VIBRATION_PATTERN = { 0, 300, 50, 200 }; 
+	public static final int VIBRATE_TIME_SHOOT  = 100;
 
 	// Space Objects
 	private PlayerShip player;
@@ -94,6 +100,9 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	// Sensor
 	private double sensorDiff = 0.0;
+	
+	// Vibration
+	private Vibrator v;
 
 	// Connection to the Display
 	private DisplayConnection connection;
@@ -110,7 +119,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	 *            the way of Connection to the Display
 	 * @param sb
 	 */
-	public SpaceEngine(DisplayConnection connection, Soundboard sb) {
+	public SpaceEngine(DisplayConnection connection, Soundboard sb, Vibrator v) {
 		Log.d(TAG, "set up the game");
 
 		Log.d(TAG, "set up the display connection");
@@ -126,7 +135,8 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		score = 0;
 		stage = 1;
 		scoreListener = new LinkedList<GameStatusListener>();
-
+		this.v = v;
+		
 		Log.d(TAG, "set up player and enemys");
 		player = new PlayerShip(START_PLAYER_X, START_PLAYER_Y, SHIP_WIDTH,
 				SHIP_HEIGHT, START_PLAYER_LIVES);
@@ -414,14 +424,28 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		sensorDiff = Math.atan2(x, y) / (Math.PI / 180);
 
 	}
+	
+	private int dark_color = 0xFF580808;
+	private int light_color = 0xFF683131;
 
 	@Override
-	public boolean onTouch(View arg0, MotionEvent event) {
+	public boolean onTouch(View view, MotionEvent event) {
 
+		
+		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			view.setBackgroundColor(light_color);
+		}
+		
 		if (event.getAction() == MotionEvent.ACTION_DOWN && !justShote.get()) {
 			DelayHelperThread t = new DelayHelperThread();
 			t.start();
 		}
+		
+		
+		if (event.getAction() == MotionEvent.ACTION_UP) {
+			view.setBackgroundColor(dark_color);
+		}
+		
 		return false;
 	}
 
@@ -445,6 +469,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 						(player.getCoordinates().y0 + 1));// grafik hack
 				l.start();
 				sb.playSound(Soundboard.PLAYERFIRE);
+				v.vibrate(VIBRATE_TIME_SHOOT);
 				d.start();
 			}
 
@@ -486,6 +511,10 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	 * notify all Live listener
 	 */
 	private void notifyLivesListener() {
+		if(v.hasVibrator()){
+//			v.cancel();
+			v.vibrate(VIBRATION_PATTERN, -1);	
+		}
 		for (GameStatusListener value : scoreListener) {
 			value.setPlayerLives(player.getLives());
 		}

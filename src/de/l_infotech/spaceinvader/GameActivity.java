@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.ViewGroup.LayoutParams;
@@ -52,6 +53,8 @@ public class GameActivity extends Activity implements GameStatusListener {
 	// TeCo Rasperry Pi Bluetooth MAC
 	// private static String address = "5C:F3:70:02:D7:C7";
 
+
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -86,8 +89,11 @@ public class GameActivity extends Activity implements GameStatusListener {
 		Log.d(TAG, "Set Up Audio");
 		Soundboard sb = new Soundboard(this);
 
+		Log.d(TAG, "Set Up Vibration");
+		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		
 		Log.d(TAG, "Set Up Game");
-		game = new SpaceEngine(connection, sb);
+		game = new SpaceEngine(connection, sb, v);
 		this.findViewById(R.id.fireButton).setOnTouchListener(game);
 		sm.registerListener(game, s, SensorManager.SENSOR_DELAY_GAME);
 		game.addScoreListener(this);
