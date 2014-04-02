@@ -67,20 +67,6 @@ public class GameActivity extends Activity implements GameStatusListener {
 
 		Log.d(TAG, "Set UP Connection");
 		connection = new BluetoothConnector();
-		if (!connection.isSupported()) {
-			Toast.makeText(getApplicationContext(),
-					"buy a new Device .... with Bluetooth!", Toast.LENGTH_LONG)
-					.show();
-			returnToMenu();
-		}
-		if (!connection.isEnable()) {
-			if (!connection.startAdapter(this)) {
-				Toast.makeText(getApplicationContext(), "unexpected error",
-						Toast.LENGTH_LONG).show();
-				returnToMenu();
-			}
-		}
-		connection.connect(address);
 
 		Log.d(TAG, "Set Up Sensor Manager");
 		sm = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
@@ -97,7 +83,7 @@ public class GameActivity extends Activity implements GameStatusListener {
 		this.findViewById(R.id.fireButton).setOnTouchListener(game);
 		sm.registerListener(game, s, SensorManager.SENSOR_DELAY_GAME);
 		game.addScoreListener(this);
-		game.start();
+		
 	}
 
 	/**
@@ -159,6 +145,8 @@ public class GameActivity extends Activity implements GameStatusListener {
 		});
 	}
 
+	
+	
 	@Override
 	public void gameOver() {
 		connection.close();
@@ -171,6 +159,30 @@ public class GameActivity extends Activity implements GameStatusListener {
 	public void onBackPressed() {
 		super.onBackPressed();
 		this.gameOver();
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		
+		if (!connection.isSupported()) {
+			Toast.makeText(getApplicationContext(),
+					"buy a new Device .... with Bluetooth!", Toast.LENGTH_LONG)
+					.show();
+			returnToMenu();
+		}
+		if (!connection.isEnable()) {
+			if (!connection.startAdapter(this)) {
+				Toast.makeText(getApplicationContext(), "unexpected error",
+						Toast.LENGTH_LONG).show();
+				returnToMenu();
+			}
+		}
+		connection.connect(address);
+		
+		if(!game.isAlive()){
+			game.start();
+		}
 	}
 
 	@Override
@@ -187,5 +199,17 @@ public class GameActivity extends Activity implements GameStatusListener {
 	public void onPause() {
 		super.onPause();
 		game.pause();
+		connection.close();
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		this.gameOver();
 	}
 }

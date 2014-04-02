@@ -655,7 +655,9 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		cur = StaticMatrix.three12;
 		this.insertGamefield(cur, 12, 12);
-		this.sendField(field);
+		if(!pause){
+			this.sendField(field);
+		}
 
 		try {
 			sleep(GAME_INITIALISATION_WAIT_TIME);
@@ -674,7 +676,10 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		cur = StaticMatrix.two12;
 		this.insertGamefield(cur, 12, 12);
+		
+		if(!pause){
 		this.sendField(field);
+		}
 
 		try {
 			sleep(GAME_INITIALISATION_WAIT_TIME);
@@ -692,7 +697,10 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		cur = StaticMatrix.one12;
 		this.insertGamefield(cur, 12, 12);
+
+		if(!pause){
 		this.sendField(field);
+		}
 
 		try {
 			sleep(GAME_INITIALISATION_WAIT_TIME);
@@ -710,7 +718,10 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		cur = StaticMatrix.null12;
 		this.insertGamefield(cur, 12, 12);
+
+		if(!pause){
 		this.sendField(field);
+		}
 
 		try {
 			sleep(GAME_INITIALISATION_WAIT_TIME);
