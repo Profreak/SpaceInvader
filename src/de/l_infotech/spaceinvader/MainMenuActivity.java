@@ -1,9 +1,6 @@
 package de.l_infotech.spaceinvader;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,7 +29,6 @@ public class MainMenuActivity extends Activity {
 	 */
 	private Button newgame;
 	private Button help;
-	private Button exit;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +37,11 @@ public class MainMenuActivity extends Activity {
 
 		newgame = (Button) this.findViewById(R.id.newgame);
 		help = (Button) this.findViewById(R.id.help);
-		exit = (Button) this.findViewById(R.id.exit);
 		TextView highscore = (TextView) this.findViewById(R.id.highscore);
 		highscore.setText("Highscore: " + StaticIO.loadScore(getApplicationContext()));
 		
 		newgame.setOnClickListener(new NewGameListener());
 		help.setOnClickListener(new HelpListener());
-		exit.setOnClickListener(new ExitListener());
 		
 	
 	}
@@ -111,49 +105,6 @@ public class MainMenuActivity extends Activity {
 					HelpActivity.class);
 			startActivity(nextScreen);
 		}
-
-	}
-
-	/**
-	 * 
-	 * @author Ludwig Biermann
-	 * @version 1.0
-	 * 
-	 */
-	private class ExitListener implements OnClickListener {
-
-		@Override
-		public void onClick(View view) {
-			Log.d(TAG, "bye bye");
-			Dialog exit = createExitMessage();
-			exit.show();
-		}
-
-	}
-
-	/**
-	 * create a new Exit Message
-	 * 
-	 * @return the new Dialog
-	 */
-	public Dialog createExitMessage() {
-		// Use the Builder class for convenient dialog construction
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.quit_question)
-				.setPositiveButton(R.string.confirm,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								System.exit(0);
-							}
-						})
-				.setNegativeButton(R.string.cancel,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								// do nothing
-							}
-						});
-		// Create the AlertDialog object and return it
-		return builder.create();
 
 	}
 

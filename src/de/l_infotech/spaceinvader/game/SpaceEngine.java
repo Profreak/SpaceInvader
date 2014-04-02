@@ -53,7 +53,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	// Resolution
 	public static final int MAX_RESOLUTION = 24;
-	public static final int BOTTOM_BORDER = 7;
+	public static final int BOTTOM_BORDER = 6;
 
 	// Graphics
 	public static final byte SHINE = (byte) 255;
@@ -63,9 +63,11 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	private static final int STAGE_VALUE = 10;
 
 	// Speed
-	private static final int ENEMY_SPEED_FAKTOR = 100; // higher -> faster per
+	private static final int ENEMY_SPEED_FAKTOR = 100; // higher -> slower per
 														// enemy
-	private static final int ENEMY_SHOOT_DELAY_FAKTOR = 200;
+	private static final int ENEMY_SHOOT_DELAY_FAKTOR = 400;
+	private static final int ENEMY_SHOOT_CHANCE = 20; // percent
+	private static final int STAGE_SPEED_FAKTOR_LIMIT = 4;
 
 	public static final int LASER_SPEED = 100; // lower -> faster
 	private static final int SHOOT_DELAY = 10 * LASER_SPEED;
@@ -77,10 +79,9 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 																	// start
 
 	public static final int SENSOR_SENSITIVITY = 3; // lower -> more controll
-	
-	
-	public static final long[] VIBRATION_PATTERN = { 0, 300, 50, 200 }; 
-	public static final int VIBRATE_TIME_SHOOT  = 100;
+
+	public static final long[] VIBRATION_PATTERN = { 0, 300, 50, 200 };
+	public static final int VIBRATE_TIME_SHOOT = 100;
 
 	// Space Objects
 	private PlayerShip player;
@@ -99,7 +100,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	// Sensor
 	private double sensorDiff = 0.0;
-	
+
 	// Vibration
 	private Vibrator v;
 
@@ -110,6 +111,9 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	private AtomicBoolean justShote;
 	private boolean isRunning = false;
 	private boolean pause = false;
+
+	private EnemyThread enemyMove;
+	private EnemyLaserThread enemyLaser;
 
 	/**
 	 * Creats a new Space Engine
@@ -132,28 +136,37 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		justShote = new AtomicBoolean();
 		this.sb = sb;
 		score = 0;
-		stage = 1;
+		stage = 0;
 		scoreListener = new LinkedList<GameStatusListener>();
 		this.v = v;
-		
+
 		Log.d(TAG, "set up player and enemys");
 		player = new PlayerShip(START_PLAYER_X, START_PLAYER_Y, SHIP_WIDTH,
 				SHIP_HEIGHT, START_PLAYER_LIVES);
-		initEnemy();
 	}
 
 	@Override
 	public void run() {
 
 		// starts the Game
-		this.initGame();
+		// this.initGame();
 		isRunning = true;
 
 		// start the Enemy AI
-		EnemyThread t = new EnemyThread();
-		t.start();
-		EnemyLaserThread t2 = new EnemyLaserThread();
-		t2.start();
+		// enemyMove = new EnemyThread();
+		// enemyMove.start();
+		// enemyLaser = new EnemyLaserThread();
+		// enemyLaser.start();
+
+		// enemyMove.interrupt();
+		// enemyLaser.interrupt();
+		// initEnemy();
+
+		// initEnemy();
+		enemyLaser = new EnemyLaserThread();
+		enemyMove = new EnemyThread();
+		enemyLaser.start();
+		enemyMove.start();
 
 		while (isRunning) {
 			if (!pause) {
@@ -168,7 +181,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 				if (!player.isAlive()) {
 					isRunning = false;
 					destroyPlayer();
-//					sb.playSound(Soundboard.EXPLOSION);
+					// sb.playSound(Soundboard.EXPLOSION);
 
 				}
 
@@ -187,11 +200,30 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 				// alle enemys killed-> next stage
 				if (enemys.size() == 0) {
+
+					enemyLaser.setWait(true);
+					
+					enemyMove.setWait(true);
+					
+
+					this.pause();
 					stage++;
 					score += STAGE_VALUE;
 					notifyScoreListener();
 					notifyStageListener();
 					initEnemy();
+					//enemyLaser = new EnemyLaserThread();
+					// enemyMove = new EnemyThread();
+
+					field = new byte[MAX_RESOLUTION][MAX_RESOLUTION];
+					this.lasers.clear();
+					this.moveEnemy();
+					this.movePlayer();
+					sendField(field);
+
+					this.continueGame();
+					enemyMove.setWait(false);
+					enemyLaser.setWait(false);
 				}
 			}
 			try {
@@ -254,7 +286,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		@Override
 		public void run() {
 			Log.d(TAG_LASER, "Start Laser Thread");
-			while (laser.isAlive()) {
+			while (laser.isAlive() && !Thread.currentThread().isInterrupted()) {
 				if (!pause) {
 
 					// moves the Laser
@@ -312,6 +344,8 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		private int direction_y;
 		private int direction_x;
 
+		private boolean wait = false;
+		
 		/**
 		 * set up a new enemy Thread
 		 */
@@ -321,42 +355,52 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 			direction_x = 1;
 		}
 
+		/**
+		 * 
+		 * @param wait
+		 */
+		public void setWait(boolean wait) {
+			this.wait = wait;
+			
+		}
+
 		@Override
 		public void run() {
 			Log.d(TAG_ENEMY, "Start Enemy Movment Thread");
-			while (true) {
-
-				if (!pause) {
+			while (!Thread.currentThread().isInterrupted()) {
+				if (!pause && ! wait) {
 					// helper Variables
 					boolean change = false;
 					boolean changeX = false;
 
 					// check if have to change direction x/y
-					for (EnemyShip value : enemys) {
-						int y0 = value.getCoordinates().y0 + direction_y;
-						int y1 = value.getCoordinates().y1 + direction_y;
+					synchronized (enemys) {
+						for (EnemyShip value : enemys) {
+							int y0 = value.getCoordinates().y0 + direction_y;
+							int y1 = value.getCoordinates().y1 + direction_y;
 
-						if (direction_y == -1 && y0 < 0) {
-							change = true;
-							break;
+							if (direction_y == -1 && y0 < 0) {
+								change = true;
+								break;
+							}
+
+							if (direction_y == 1 && y1 > 23) {
+								change = true;
+								break;
+							}
+
+							int x0 = value.getCoordinates().x0 + direction_x;
+							int x1 = value.getCoordinates().x1 + direction_x;
+
+							if (direction_x == -1 && x0 <= 0) {
+								changeX = true;
+							}
+
+							if (direction_x == 1 && x1 >= BOTTOM_BORDER) {
+								changeX = true;
+							}
+
 						}
-
-						if (direction_y == 1 && y1 > 23) {
-							change = true;
-							break;
-						}
-
-						int x0 = value.getCoordinates().x0 + direction_x;
-						int x1 = value.getCoordinates().x1 + direction_x;
-
-						if (direction_x == -1 && x0 <= 0) {
-							changeX = true;
-						}
-
-						if (direction_x == 1 && x1 >= BOTTOM_BORDER) {
-							changeX = true;
-						}
-
 					}
 
 					// do the change
@@ -389,19 +433,29 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 					} else {
 						// Move
-						for (EnemyShip value : enemys) {
-							Log.d(TAG_ENEMY,
-									"Move Enemy x: "
-											+ value.getCoordinates().x0
-											+ " y: "
-											+ value.getCoordinates().y0);
-							value.getCoordinates().move(0, direction_y);
+						synchronized (enemys) {
+							for (EnemyShip value : enemys) {
+								Log.d(TAG_ENEMY,
+										"Move Enemy x: "
+												+ value.getCoordinates().x0
+												+ " y: "
+												+ value.getCoordinates().y0);
+								value.getCoordinates().move(0, direction_y);
+							}
 						}
 					}
 				}
 				// sleep a time. If there more enemy enemys will be slower
 				try {
-					sleep(ENEMY_SPEED_FAKTOR * enemys.size());
+					int stageF = 1;
+					if(stage != 0){
+						stageF = stage;
+					}
+					if(stage > STAGE_SPEED_FAKTOR_LIMIT){
+						stageF = STAGE_SPEED_FAKTOR_LIMIT;
+					}
+					
+					sleep((ENEMY_SPEED_FAKTOR * enemys.size()) / stageF);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -418,51 +472,46 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		
+
 		float x = event.values[0];
 		float y = event.values[1];
 		float z = event.values[2];
-		
+
 		Log.d(TAG_SENSOR, "x: " + x + " y: " + y + " z: " + z);
-	
+
 		sensorDiff = y;
-		
-/*		sensorDiff = 0;
-		
-		if(y < 0){
-			sensorDiff = -1;
-		} 
-		
-		if(y > 0) {
-			sensorDiff = 1;
-		}
-*/		
-		
-//		sensorDiff = Math.atan2(y, x) / (Math.PI / 180);
+
+		/*
+		 * sensorDiff = 0;
+		 * 
+		 * if(y < 0){ sensorDiff = -1; }
+		 * 
+		 * if(y > 0) { sensorDiff = 1; }
+		 */
+
+		// sensorDiff = Math.atan2(y, x) / (Math.PI / 180);
 
 	}
-	
+
 	private int dark_color = 0xFF580808;
 	private int light_color = 0xFF683131;
 
 	@Override
 	public boolean onTouch(View view, MotionEvent event) {
 
-		
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			view.setBackgroundColor(light_color);
 		}
-		
+
 		if (event.getAction() == MotionEvent.ACTION_DOWN && !justShote.get()) {
 			DelayHelperThread t = new DelayHelperThread();
 			t.start();
 		}
-		
-		
+
 		if (event.getAction() == MotionEvent.ACTION_UP) {
 			view.setBackgroundColor(dark_color);
 		}
-		
+
 		return false;
 	}
 
@@ -528,9 +577,9 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	 * notify all Live listener
 	 */
 	private void notifyLivesListener() {
-		if(v.hasVibrator()){
-//			v.cancel();
-			v.vibrate(VIBRATION_PATTERN, -1);	
+		if (v.hasVibrator()) {
+			// v.cancel();
+			v.vibrate(VIBRATION_PATTERN, -1);
 		}
 		for (GameStatusListener value : scoreListener) {
 			value.setPlayerLives(player.getLives());
@@ -553,10 +602,10 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	private void movePlayer() {
 		this.insertGamefield(player.getGraphics(), player.getCoordinates().x0,
 				player.getCoordinates().y0);
-		
-//		int move_y = (int) sensorDiff;
+
+		// int move_y = (int) sensorDiff;
 		int move_y = (int) Math.round(sensorDiff / SENSOR_SENSITIVITY);
-		
+
 		this.player.getCoordinates().move(0, move_y);
 	}
 
@@ -599,7 +648,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 							value.getCoordinates().x0,
 							value.getCoordinates().y0);
 					enemys.remove(z);
-					score += ENEMY_VALUE;
+					score += (ENEMY_VALUE * stage);
 					notifyScoreListener();
 					sb.playSound(Soundboard.EXPLOSION);
 				}
@@ -637,103 +686,6 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	}
 
 	/**
-	 * starts the countdown
-	 */
-	private void initGame() {
-
-		field = new byte[MAX_RESOLUTION][MAX_RESOLUTION];
-		byte[][] cur;
-
-		cur = StaticMatrix.three12;
-		this.insertGamefield(cur, 0, 0);
-
-		cur = StaticMatrix.three12;
-		this.insertGamefield(cur, 12, 0);
-
-		cur = StaticMatrix.three12;
-		this.insertGamefield(cur, 0, 12);
-
-		cur = StaticMatrix.three12;
-		this.insertGamefield(cur, 12, 12);
-		if(!pause){
-			this.sendField(field);
-		}
-
-		try {
-			sleep(GAME_INITIALISATION_WAIT_TIME);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		cur = StaticMatrix.two12;
-		this.insertGamefield(cur, 0, 0);
-
-		cur = StaticMatrix.two12;
-		this.insertGamefield(cur, 12, 0);
-
-		cur = StaticMatrix.two12;
-		this.insertGamefield(cur, 0, 12);
-
-		cur = StaticMatrix.two12;
-		this.insertGamefield(cur, 12, 12);
-		
-		if(!pause){
-		this.sendField(field);
-		}
-
-		try {
-			sleep(GAME_INITIALISATION_WAIT_TIME);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		cur = StaticMatrix.one12;
-		this.insertGamefield(cur, 0, 0);
-
-		cur = StaticMatrix.one12;
-		this.insertGamefield(cur, 12, 0);
-
-		cur = StaticMatrix.one12;
-		this.insertGamefield(cur, 0, 12);
-
-		cur = StaticMatrix.one12;
-		this.insertGamefield(cur, 12, 12);
-
-		if(!pause){
-		this.sendField(field);
-		}
-
-		try {
-			sleep(GAME_INITIALISATION_WAIT_TIME);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		cur = StaticMatrix.null12;
-		this.insertGamefield(cur, 0, 0);
-
-		cur = StaticMatrix.null12;
-		this.insertGamefield(cur, 12, 0);
-
-		cur = StaticMatrix.null12;
-		this.insertGamefield(cur, 0, 12);
-
-		cur = StaticMatrix.null12;
-		this.insertGamefield(cur, 12, 12);
-
-		if(!pause){
-		this.sendField(field);
-		}
-
-		try {
-			sleep(GAME_INITIALISATION_WAIT_TIME);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		field = new byte[MAX_RESOLUTION][MAX_RESOLUTION];
-
-	}
-
-	/**
 	 * initiates enemy ships
 	 */
 	private void initEnemy() {
@@ -744,6 +696,38 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 				// hitables.add(enemy);
 			}
 		}
+
+		int xdiff = enemys.get((enemys.size() - 1)).getCoordinates().x1;
+
+		this.field = StaticMatrix.CLEAR;
+
+		for (EnemyShip value : enemys) {
+			value.getCoordinates().x0 -= xdiff;
+			value.getCoordinates().x1 -= xdiff;
+		}
+
+		this.sendField(field);
+
+		sb.playSound(Soundboard.TIEFLY);
+
+		for (int x = 0; x < (xdiff + 1); x++) {
+
+			for (EnemyShip value : enemys) {
+				value.getCoordinates().x0 += 1;
+				value.getCoordinates().x1 += 1;
+
+				this.insertGamefield(value.getGraphics(),
+						value.getCoordinates().x0, value.getCoordinates().y0);
+			}
+
+			this.sendField(field);
+			try {
+				sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	/**
@@ -764,7 +748,8 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 			for (int y = 0; y < graphic[0].length; y++) {
 				Log.d(TAG, "x: " + coor_x + " y:" + tmp_y + " byte:"
 						+ graphic[x][y]);
-				if (coor_x < MAX_RESOLUTION && coor_y < MAX_RESOLUTION) {
+				if (coor_x < MAX_RESOLUTION && coor_y < MAX_RESOLUTION
+						&& coor_x >= 0 && coor_y >= 0) {
 					field[coor_x][tmp_y] = graphic[x][y];
 				}
 				tmp_y++;
@@ -820,6 +805,8 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		}
 	}
 
+	static int allID;
+
 	/**
 	 * 
 	 * A Helper Class to make a timespace between two shots of the Enemys
@@ -830,20 +817,36 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	 */
 	private class EnemyLaserThread extends Thread {
 
-		int MAX = 100;
-		int MIN = 0;
-		int SHOOT_CHANCE = 20;
+		private int MAX = 100;
+		private int MIN = 0;
+		private int id = 0;
+		private boolean wait = false;
+
+		public EnemyLaserThread() {
+			Log.d("Thread", "start Thread " + id);
+			id = allID;
+			allID++;
+		}
+
+		/**
+		 * 
+		 * @param b
+		 */
+		public void setWait(boolean wait) {
+			this.wait = wait;
+		}
 
 		@Override
 		public void run() {
-			while (isRunning) {
-				if (!pause) {
+			while (isRunning && !Thread.currentThread().isInterrupted()) {
+
+				if (!pause && !wait) {
 					Random random = new Random();
 
 					try {
 						for (EnemyShip value : enemys) {
 							int z = random.nextInt(MAX - MIN + 1) + MIN;
-							if (z < SHOOT_CHANCE) {
+							if (z < ENEMY_SHOOT_CHANCE) {
 								Log.d(TAG_LASER, "Fire Enemy laser");
 								synchronized (justShote) {
 									LaserThread l = new LaserThread(1,
@@ -859,14 +862,31 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 					}
 				}
 				try {
-					sleep(ENEMY_SHOOT_DELAY_FAKTOR * enemys.size());
+					//stage = 1 -> 1
+					//stage = 2 -> 2
+					//stage = 3 -> 3
+					//stage = 4 -> 4
+					//stage = 5 -> 5
+					int stageF = 1;
+					if(stage != 0){
+						stageF = stage;
+					}
+					if(stage > STAGE_SPEED_FAKTOR_LIMIT){
+						stageF = STAGE_SPEED_FAKTOR_LIMIT;
+					}
+					
+					sleep((ENEMY_SHOOT_DELAY_FAKTOR * enemys.size()) / stageF);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				Log.d("Thread", "EnemyThread " + id + " "
+						+ Thread.currentThread().isInterrupted());
 
 			}
+			Log.d("Thread", "Thread zu Ende " + id);
 		}
 	}
+	
 
 	/**
 	 * pause the game
@@ -887,11 +907,16 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	 * starts the countdown
 	 */
 	private void resumeGame() {
+		int y = 0;
+
+		if (player.getCoordinates().y0 < 12) {
+			y = 12;
+		}
 
 		byte[][] cur;
 
 		cur = StaticMatrix.three12;
-		this.insertGamefield(cur, 12, 0);
+		this.insertGamefield(cur, 12, y);
 		this.sendField(field);
 
 		try {
@@ -901,7 +926,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		}
 
 		cur = StaticMatrix.two12;
-		this.insertGamefield(cur, 12, 0);
+		this.insertGamefield(cur, 12, y);
 		this.sendField(field);
 
 		try {
@@ -911,7 +936,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		}
 
 		cur = StaticMatrix.one12;
-		this.insertGamefield(cur, 12, 0);
+		this.insertGamefield(cur, 12, y);
 		this.sendField(field);
 
 		try {
@@ -921,7 +946,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 		}
 
 		cur = StaticMatrix.null12;
-		this.insertGamefield(cur, 12, 0);
+		this.insertGamefield(cur, 12, y);
 		this.sendField(field);
 
 		try {

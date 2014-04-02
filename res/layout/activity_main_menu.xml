@@ -47,13 +47,6 @@
             android:layout_below="@+id/newgame"
             android:text="@string/help" />
 
-        <Button
-            android:id="@+id/exit"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/help"
-            android:text="@string/exit" />
-
     </RelativeLayout>
     
     <TextView

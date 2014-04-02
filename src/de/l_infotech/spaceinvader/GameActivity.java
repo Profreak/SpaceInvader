@@ -52,8 +52,6 @@ public class GameActivity extends Activity implements GameStatusListener {
 
 	// TeCo Rasperry Pi Bluetooth MAC
 	// private static String address = "5C:F3:70:02:D7:C7";
-
-
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,28 +59,10 @@ public class GameActivity extends Activity implements GameStatusListener {
 
 		Log.d(TAG, "Create Game Activity Views");
 		setContentView(R.layout.activity_game);
+		
 		scoreView = (TextView) this.findViewById(R.id.score);
 		stageView = (TextView) this.findViewById(R.id.stage);
 		livesLayout = (LinearLayout) this.findViewById(R.id.lives);
-
-		Log.d(TAG, "Set UP Connection");
-		connection = new BluetoothConnector();
-
-		Log.d(TAG, "Set Up Sensor Manager");
-		sm = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-		Sensor s = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-		Log.d(TAG, "Set Up Audio");
-		Soundboard sb = new Soundboard(this);
-
-		Log.d(TAG, "Set Up Vibration");
-		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-		
-		Log.d(TAG, "Set Up Game");
-		game = new SpaceEngine(connection, sb, v);
-		this.findViewById(R.id.fireButton).setOnTouchListener(game);
-		sm.registerListener(game, s, SensorManager.SENSOR_DELAY_GAME);
-		game.addScoreListener(this);
 		
 	}
 
@@ -140,13 +120,10 @@ public class GameActivity extends Activity implements GameStatusListener {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				stageView.setText("Stage: " + stages);
-
 			}
 		});
 	}
 
-	
-	
 	@Override
 	public void gameOver() {
 		connection.close();
@@ -158,12 +135,39 @@ public class GameActivity extends Activity implements GameStatusListener {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		this.gameOver();
+		connection.close();
+		sm.unregisterListener(game);
+		StaticIO.saveScore(game.getScore(), this.getApplicationContext());
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
+
+		Log.d(TAG, "Set UP Connection");
+		connection = new BluetoothConnector();
+
+		Log.d(TAG, "Set Up Sensor Manager");
+		sm = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+		Sensor s = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+		Log.d(TAG, "Set Up Audio");
+		Soundboard sb = new Soundboard(this);
+
+		Log.d(TAG, "Set Up Vibration");
+		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		
+		Log.d(TAG, "Set Up Game");
+		game = new SpaceEngine(connection, sb, v);
+		this.findViewById(R.id.fireButton).setOnTouchListener(game);
+		sm.registerListener(game, s, SensorManager.SENSOR_DELAY_GAME);
+		game.addScoreListener(this);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		
 		
 		if (!connection.isSupported()) {
 			Toast.makeText(getApplicationContext(),
@@ -183,11 +187,7 @@ public class GameActivity extends Activity implements GameStatusListener {
 		if(!game.isAlive()){
 			game.start();
 		}
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
+		
 		if (!connection.isEnable()) {
 			gameOver();
 		}else {

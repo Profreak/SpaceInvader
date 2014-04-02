@@ -17,11 +17,13 @@ public class Soundboard {
 	public final static int ENEMYFIRE = 1; 
 	public final static int EXPLOSION = 2; 
 	public final static int PLAYERFIRE = 3; 
+	public final static int TIEFLY = 4; 
 	
 	private SoundPool soundpool;
 	private int sound_1;
 	private int sound_2;
 	private int sound_3;
+	private int sound_4;
 	private Context context;
 
 	/**
@@ -37,6 +39,7 @@ public class Soundboard {
 		sound_1 = soundpool.load(context, R.raw.enemyfire, 1);
 		sound_2 = soundpool.load(context, R.raw.playerfire, 1);
 		sound_3 = soundpool.load(context, R.raw.explosion, 1);
+		sound_4 = soundpool.load(context, R.raw.tiefly, 1);
 	}
 
 	/**
@@ -60,6 +63,9 @@ public class Soundboard {
 		}
 		if(id == PLAYERFIRE) {
 			soundpool.play(sound_2, volume, volume, 1, 0, 1f);
+		}
+		if(id == TIEFLY) {
+			soundpool.play(sound_4, volume, volume, 1, 0, 1f);
 		}
 
 	}
