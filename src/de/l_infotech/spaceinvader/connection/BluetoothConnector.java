@@ -30,6 +30,7 @@ public class BluetoothConnector implements DisplayConnection {
 	private int REQUEST_ENABLE_BT = 10;
 	private int port = 16;
 	private OutputStream outStream = null;
+	private String address;
 
 	/**
 	 * creates a new BluetoothConnector
@@ -61,6 +62,7 @@ public class BluetoothConnector implements DisplayConnection {
 
 	@Override
 	public boolean connect(String address) {
+		this.address = address;
 
 		Log.d(TAG, "Connect to adress");
 		try {
@@ -110,6 +112,7 @@ public class BluetoothConnector implements DisplayConnection {
 				} catch (IOException e) {
 					e.printStackTrace();
 					Log.e(TAG, "faild to send Matrix.", e);
+					
 				}
 			}
 		}

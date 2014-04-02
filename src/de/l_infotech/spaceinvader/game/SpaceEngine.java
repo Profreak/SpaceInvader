@@ -76,7 +76,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 																	// faster
 																	// start
 
-	public static final int SENSOR_SENSITIVITY = 120; // lower -> more controll
+	public static final int SENSOR_SENSITIVITY = 3; // lower -> more controll
 	
 	
 	public static final long[] VIBRATION_PATTERN = { 0, 300, 50, 200 }; 
@@ -418,9 +418,27 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		float x = event.values[1];
-		float y = event.values[0];
-		sensorDiff = Math.atan2(x, y) / (Math.PI / 180);
+		
+		float x = event.values[0];
+		float y = event.values[1];
+		float z = event.values[2];
+		
+		Log.d(TAG_SENSOR, "x: " + x + " y: " + y + " z: " + z);
+	
+		sensorDiff = y;
+		
+/*		sensorDiff = 0;
+		
+		if(y < 0){
+			sensorDiff = -1;
+		} 
+		
+		if(y > 0) {
+			sensorDiff = 1;
+		}
+*/		
+		
+//		sensorDiff = Math.atan2(y, x) / (Math.PI / 180);
 
 	}
 	
@@ -535,7 +553,10 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 	private void movePlayer() {
 		this.insertGamefield(player.getGraphics(), player.getCoordinates().x0,
 				player.getCoordinates().y0);
+		
+//		int move_y = (int) sensorDiff;
 		int move_y = (int) Math.round(sensorDiff / SENSOR_SENSITIVITY);
+		
 		this.player.getCoordinates().move(0, move_y);
 	}
 
