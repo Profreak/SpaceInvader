@@ -136,7 +136,7 @@ public class SpaceEngine extends Thread implements SensorEventListener,
 
 		justShote = new AtomicBoolean();
 		this.sb = sb;
-		score = -STAGE_VALUE;
+		score = -40;
 		stage = 0;
 		maxEnemys = 999;
 		scoreListener = new LinkedList<GameStatusListener>();
